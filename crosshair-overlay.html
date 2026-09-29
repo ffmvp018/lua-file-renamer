@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crosshair Overlay Utility</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #1a1a1a;
+            color: #fff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            background: #2a2a2a;
+            border-radius: 10px;
+            padding: 30px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+            max-width: 500px;
+            width: 100%;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 24px;
+        }
+
+        .controls-section {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        label {
+            font-weight: bold;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        input[type="range"],
+        input[type="color"],
+        select {
+            padding: 10px;
+            border: 1px solid #444;
+            border-radius: 5px;
+            background: #333;
+            color: #fff;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        input[type="range"] {
+            padding: 5px;
+        }
+
+        select option {
+            background: #333;
+            color: #fff;
+        }
+
+        .value-display {
+            font-size: 12px;
+            color: #aaa;
+            margin-top: 5px;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        button {
+            flex: 1;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 5px;
+            font-size: 14px;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-launch {
+            background: #4CAF50;
+            color: #fff;
+        }
+
+        .btn-launch:hover {
+            background: #45a049;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(76, 175, 80, 0.3);
+        }
+
+        .btn-reset {
+            background: #ff9800;
+            color: #fff;
+        }
+
+        .btn-reset:hover {
+            background: #e68900;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 152, 0, 0.3);
+        }
+
+        .preset-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .preset-btn {
+            padding: 10px;
+            background: #444;
+            color: #fff;
+            border: 1px solid #555;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.2s ease;
+        }
+
+        .preset-btn:hover {
+            background: #555;
+            border-color: #666;
+        }
+
+        .info-box {
+            background: #333;
+            border-left: 4px solid #4CAF50;
+            padding: 15px;
+            border-radius: 5px;
+            margin-top: 20px;
+            font-size: 12px;
+            line-height: 1.6;
+        }
+
+        .info-box strong {
+            color: #4CAF50;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎯 Crosshair Overlay</h1>
+
+        <div class="controls-section">
+            <!-- Crosshair Type -->
+            <div class="control-group">
+                <label for="crosshair-type">Crosshair Type</label>
+                <select id="crosshair-type">
+                    <option value="plus">Plus (+)</option>
+                    <option value="cross">Cross (×)</option>
+                    <option value="dot">Dot (•)</option>
+                    <option value="circle">Circle</option>
+                    <option value="square">Square</option>
+                    <option value="triangle">Triangle</option>
+                </select>
+            </div>
+
+            <!-- Size -->
+            <div class="control-group">
+                <label for="size">Size: <span class="value-display" id="size-value">20px</span></label>
+                <input type="range" id="size" min="5" max="100" value="20" step="1">
+            </div>
+
+            <!-- Color -->
+            <div class="control-group">
+                <label for="color">Color</label>
+                <input type="color" id="color" value="#00ff00">
+            </div>
+
+            <!-- Opacity -->
+            <div class="control-group">
+                <label for="opacity">Opacity: <span class="value-display" id="opacity-value">100%</span></label>
+                <input type="range" id="opacity" min="0" max="100" value="100" step="1">
+            </div>
+
+            <!-- Line Width -->
+            <div class="control-group">
+                <label for="linewidth">Line Width: <span class="value-display" id="linewidth-value">2px</span></label>
+                <input type="range" id="linewidth" min="1" max="10" value="2" step="1">
+            </div>
+
+            <!-- Gap -->
+            <div class="control-group">
+                <label for="gap">Gap from Center: <span class="value-display" id="gap-value">5px</span></label>
+                <input type="range" id="gap" min="0" max="50" value="5" step="1">
+            </div>
+
+            <!-- Preset Buttons -->
+            <div class="control-group">
+                <label>Presets</label>
+                <div class="preset-group">
+                    <button class="preset-btn" onclick="loadPreset('minimal')">Minimal</button>
+                    <button class="preset-btn" onclick="loadPreset('bright')">Bright</button>
+                    <button class="preset-btn" onclick="loadPreset('tactical')">Tactical</button>
+                    <button class="preset-btn" onclick="loadPreset('small')">Small</button>
+                </div>
+            </div>
+
+            <!-- Buttons -->
+            <div class="button-group">
+                <button class="btn-launch" onclick="launchOverlay()">Launch Overlay</button>
+                <button class="btn-reset" onclick="resetSettings()">Reset</button>
+            </div>
+        </div>
+
+        <div class="info-box">
+            <strong>ℹ️ How to Use:</strong><br>
+            1. Adjust the crosshair settings above<br>
+            2. Click "Launch Overlay" to open the overlay window<br>
+            3. The overlay will appear on top of your screen<br>
+            4. Close the overlay window when done
+        </div>
+    </div>
+
+    <script>
+        // Update value displays
+        document.getElementById('size').addEventListener('input', (e) => {
+            document.getElementById('size-value').textContent = e.target.value + 'px';
+        });
+
+        document.getElementById('opacity').addEventListener('input', (e) => {
+            document.getElementById('opacity-value').textContent = e.target.value + '%';
+        });
+
+        document.getElementById('linewidth').addEventListener('input', (e) => {
+            document.getElementById('linewidth-value').textContent = e.target.value + 'px';
+        });
+
+        document.getElementById('gap').addEventListener('input', (e) => {
+            document.getElementById('gap-value').textContent = e.target.value + 'px';
+        });
+
+        // Preset configurations
+        const presets = {
+            minimal: {
+                type: 'dot',
+                size: 10,
+                color: '#00ff00',
+                opacity: 80,
+                linewidth: 1,
+                gap: 0
+            },
+            bright: {
+                type: 'plus',
+                size: 30,
+                color: '#ffff00',
+                opacity: 100,
+                linewidth: 3,
+                gap: 10
+            },
+            tactical: {
+                type: 'circle',
+                size: 25,
+                color: '#00ff00',
+                opacity: 70,
+                linewidth: 2,
+                gap: 8
+            },
+            small: {
+                type: 'cross',
+                size: 15,
+                color: '#0080ff',
+                opacity: 90,
+                linewidth: 2,
+                gap: 3
+            }
+        };
+
+        function loadPreset(presetName) {
+            const preset = presets[presetName];
+            if (!preset) return;
+
+            document.getElementById('crosshair-type').value = preset.type;
+            document.getElementById('size').value = preset.size;
+            document.getElementById('color').value = preset.color;
+            document.getElementById('opacity').value = preset.opacity;
+            document.getElementById('linewidth').value = preset.linewidth;
+            document.getElementById('gap').value = preset.gap;
+
+            // Update displays
+            document.getElementById('size-value').textContent = preset.size + 'px';
+            document.getElementById('opacity-value').textContent = preset.opacity + '%';
+            document.getElementById('linewidth-value').textContent = preset.linewidth + 'px';
+            document.getElementById('gap-value').textContent = preset.gap + 'px';
+        }
+
+        function resetSettings() {
+            loadPreset('tactical');
+        }
+
+        function getSettings() {
+            return {
+                type: document.getElementById('crosshair-type').value,
+                size: parseInt(document.getElementById('size').value),
+                color: document.getElementById('color').value,
+                opacity: parseInt(document.getElementById('opacity').value),
+                linewidth: parseInt(document.getElementById('linewidth').value),
+                gap: parseInt(document.getElementById('gap').value)
+            };
+        }
+
+        function launchOverlay() {
+            const settings = getSettings();
+            const overlayHTML = generateOverlayHTML(settings);
+            
+            const blob = new Blob([overlayHTML], { type: 'text/html' });
+            const url = URL.createObjectURL(blob);
+            
+            window.open(url, 'crosshair_overlay', 'width=800,height=600,menubar=no,toolbar=no,location=no');
+        }
+
+        function generateOverlayHTML(settings) {
+            return `
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: transparent;
+            overflow: hidden;
+        }
+        canvas {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="canvas"></canvas>
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        const settings = ${JSON.stringify(settings)};
+
+        function drawCrosshair() {
+            const centerX = canvas.width / 2;
+            const centerY = canvas.height / 2;
+
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.strokeStyle = settings.color;
+            ctx.fillStyle = settings.color;
+            ctx.globalAlpha = settings.opacity / 100;
+            ctx.lineWidth = settings.linewidth;
+
+            switch(settings.type) {
+                case 'plus':
+                    drawPlus(centerX, centerY);
+                    break;
+                case 'cross':
+                    drawCross(centerX, centerY);
+                    break;
+                case 'dot':
+                    drawDot(centerX, centerY);
+                    break;
+                case 'circle':
+                    drawCircle(centerX, centerY);
+                    break;
+                case 'square':
+                    drawSquare(centerX, centerY);
+                    break;
+                case 'triangle':
+                    drawTriangle(centerX, centerY);
+                    break;
+            }
+        }
+
+        function drawPlus(x, y) {
+            const size = settings.size;
+            const gap = settings.gap;
+            ctx.beginPath();
+            ctx.moveTo(x - size - gap, y);
+            ctx.lineTo(x - gap, y);
+            ctx.moveTo(x + gap, y);
+            ctx.lineTo(x + size + gap, y);
+            ctx.moveTo(x, y - size - gap);
+            ctx.lineTo(x, y - gap);
+            ctx.moveTo(x, y + gap);
+            ctx.lineTo(x, y + size + gap);
+            ctx.stroke();
+        }
+
+        function drawCross(x, y) {
+            const size = settings.size;
+            const gap = settings.gap;
+            ctx.beginPath();
+            ctx.moveTo(x - size - gap, y - size - gap);
+            ctx.lineTo(x - gap, y - gap);
+            ctx.moveTo(x + gap, y + gap);
+            ctx.lineTo(x + size + gap, y + size + gap);
+            ctx.moveTo(x + size + gap, y - size - gap);
+            ctx.lineTo(x + gap, y - gap);
+            ctx.moveTo(x - gap, y + gap);
+            ctx.lineTo(x - size - gap, y + size + gap);
+            ctx.stroke();
+        }
+
+        function drawDot(x, y) {
+            ctx.beginPath();
+            ctx.arc(x, y, settings.size / 2, 0, Math.PI * 2);
+            ctx.fill();
+        }
+
+        function drawCircle(x, y) {
+            ctx.beginPath();
+            ctx.arc(x, y, settings.size, 0, Math.PI * 2);
+            ctx.stroke();
+        }
+
+        function drawSquare(x, y) {
+            const s = settings.size;
+            ctx.strokeRect(x - s, y - s, s * 2, s * 2);
+        }
+
+        function drawTriangle(x, y) {
+            const s = settings.size;
+            ctx.beginPath();
+            ctx.moveTo(x, y - s);
+            ctx.lineTo(x + s, y + s);
+            ctx.lineTo(x - s, y + s);
+            ctx.closePath();
+            ctx.stroke();
+        }
+
+        window.addEventListener('resize', () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            drawCrosshair();
+        });
+
+        window.addEventListener('mousemove', drawCrosshair);
+
+        drawCrosshair();
+
+        // Allow close on ESC key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') window.close();
+        });
+    </script>
+</body>
+</html>
+            `;
+        }
+    </script>
+</body>
+</html>
